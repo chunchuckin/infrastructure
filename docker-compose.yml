@@ -1,0 +1,45 @@
+version: "3.9" 
+services:
+
+  nginx:
+    image: "nginx:latest"
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes: 
+      - ./conf:/etc/nginx/conf.d
+      - ./html:/usr/share/nginx/html 
+    depends_on:
+      - php-fpm
+
+  php-fpm:
+    image: "php:7.4-fpm-mysql"
+    container_name: php-fpm
+    volumes: 
+      - ./html:/usr/share/nginx/html
+
+  mysql:
+    image: "mysql:latest"
+    container_name: mysql
+    ports: 
+      - "3306:3306"
+    environment:
+      TZ: Europe/Moscow
+      MYSQL_ROOT_PASSWORD: Str0ngPaSSw0rd
+      MYSQL_DATABASE: register
+    volumes:
+      - ./data:/var/lib/mysql
+      - ./reg_dump.sql:/docker-entrypoint-initdb.d/reg_dump.sql
+
+
+  phpmyadmin: 
+    image: "phpmyadmin:latest"
+    container_name: phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      - TZ=Europe/Moscow
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+    depends_on:
+      - mysql 
